@@ -19,6 +19,8 @@ export class LoginService {
   ) {}
 
 
+	// Esta validación de usuarios permite distinguir entre un usuario estudiante a un docente o un docente mediante el directorio activo para segun eso asignar privilegios o roles
+
   async validateUser(username: string, password: string, apiKey: string, apiSecret: string) {
     // Validación de API Key y API Secret
     if (apiKey !== process.env.API_KEY || apiSecret !== process.env.API_SECRET) {
