@@ -28,4 +28,8 @@ export class VinculacionEmpresas {
 
   @Column({ name: 'VINE_ESTADO' })
   estado: number;
+
+  @Column({ name: 'VINE_DESCRIPCION', nullable: true, length: 500, default: '' })  
+  descripcion: string;  
+
 }

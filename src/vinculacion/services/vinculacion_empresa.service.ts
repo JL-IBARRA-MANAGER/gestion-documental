@@ -1,55 +1,58 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { VinculacionEmpresas } from '../entities/vinculacion_empresas.entity';
-import { VinculacionEmpresaTipo } from '../entities/vinculacion_empresa_tipo.entity';
-import { UpdateVinculacionEmpresaDto } from '../dtos/update-vinculacion-empresa.dto';
-import { CreateVinculacionEmpresaDto } from '../dtos/create-vinculacion-empresa.dto';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';  
+import { InjectRepository } from '@nestjs/typeorm';  
+import { Repository } from 'typeorm';  
+import { VinculacionEmpresas } from '../entities/vinculacion_empresas.entity';  
+import { VinculacionEmpresaTipo } from '../entities/vinculacion_empresa_tipo.entity';  
+import { UpdateVinculacionEmpresaDto } from '../dtos/update-vinculacion-empresa.dto';  
+import { CreateVinculacionEmpresaDto } from '../dtos/create-vinculacion-empresa.dto';  
 
+@Injectable()  
+export class VinculacionEmpresaService {  
+  constructor(  
+    @InjectRepository(VinculacionEmpresas)  
+    private vinculacionEmpresasRepository: Repository<VinculacionEmpresas>,  
+    @InjectRepository(VinculacionEmpresaTipo)  
+    private vinculacionEmpresaTipoRepository: Repository<VinculacionEmpresaTipo>,  
+  ) {}  
 
-
-@Injectable()
-export class VinculacionEmpresaService {
-  constructor(
-    @InjectRepository(VinculacionEmpresas)
-    private vinculacionEmpresasRepository: Repository<VinculacionEmpresas>,
-    @InjectRepository(VinculacionEmpresaTipo)
-    private vinculacionEmpresaTipoRepository: Repository<VinculacionEmpresaTipo>,
-  ) {}
-
-  async getEmpresasVinculadas(): Promise<any[]> {  
-    return this.vinculacionEmpresasRepository.query(`  
-        SELECT   
-        ve."VINE_ID",   
-        ve."VINE_NOMBRE",   
-        ve."VINE_TELEFONO",   
-        ve."VINE_CORREO",   
-        ve."VINE_CONTACTO",  
-        ve."VINE_IDENTIFICACION",  
-        ve."VINET_ID",  
-        vet."VINET_NOMBRE",  
-        ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
-        CASE  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
-            ELSE 'OTRO'  
-        END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
-        ve."VINE_CODIGO_BANNER",  
-        ve."VINE_ID_PARROQUIA",  
-        ve."VINE_DIRECCION"  
-        FROM   
-        public."tbl_vinculacion_empresas" ve  
-        JOIN   
-        public."tbl_vinculacion_empresa_tipo" vet   
-        ON   
-        ve."VINET_ID" = vet."VINET_ID"  
-        WHERE   
-        ve."VINE_ESTADO" = 1  
-        ORDER BY   
-        ve."VINE_NOMBRE" ASC  
-    `);  
-  } 
+  async getEmpresaVinculadaById(VINE_ID: number): Promise<any> {  
+      const result = await this.vinculacionEmpresasRepository.query(`  
+          SELECT   
+          ve."VINE_ID",   
+          ve."VINE_NOMBRE",   
+          ve."VINE_TELEFONO",   
+          ve."VINE_CORREO",   
+          ve."VINE_CONTACTO",  
+          ve."VINE_IDENTIFICACION",  
+          ve."VINET_ID",  
+          vet."VINET_NOMBRE",  
+          ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
+          CASE  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
+              ELSE 'OTRO'  
+          END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
+          ve."VINE_CODIGO_BANNER",  
+          ve."VINE_ID_PARROQUIA",  
+          ve."VINE_DIRECCION",  
+          COALESCE(ve."VINE_DESCRIPCION", '') as "VINE_DESCRIPCION"  
+          FROM   
+          public."tbl_vinculacion_empresas" ve  
+          JOIN   
+          public."tbl_vinculacion_empresa_tipo" vet   
+          ON   
+          ve."VINET_ID" = vet."VINET_ID"  
+          WHERE   
+          ve."VINE_ID" = $1  
+      `, [VINE_ID]);  
+      
+      if (!result || result.length === 0) {  
+        throw new HttpException('Empresa no encontrada', HttpStatus.NOT_FOUND);  
+      }  
+      return result[0];  
+  }  
+ 
 
   async vincularEmpresa(createDto: CreateVinculacionEmpresaDto): Promise<any> {  
     return this.vinculacionEmpresasRepository.query(  
@@ -64,8 +67,11 @@ export class VinculacionEmpresaService {
         "VINE_SECTOR_ECONOMICO",  
         "VINE_CODIGO_BANNER",  
         "VINE_ID_PARROQUIA",  
-        "VINE_DIRECCION"  
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)  
+        "VINE_DIRECCION",  
+        "VINE_DESCRIPCION",  
+        "VINE_ESTADO"   
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 1)  
+        RETURNING "VINE_ID"  
         `,  
         [  
         createDto.VINE_NOMBRE ?? null,  
@@ -78,77 +84,39 @@ export class VinculacionEmpresaService {
         createDto.VINE_CODIGO_BANNER ?? null,  
         createDto.VINE_ID_PARROQUIA ?? null,  
         createDto.VINE_DIRECCION ?? null,  
+        createDto.VINE_DESCRIPCION ?? ''  
         ],  
     );  
-  } 
+  }  
 
+  async getTipoEmpresa(): Promise<any[]> {  
+    return this.vinculacionEmpresaTipoRepository.query(`  
+      SELECT "VINET_ID", "VINET_NOMBRE"  
+      FROM public.tbl_vinculacion_empresa_tipo  
+      WHERE "VINET_ESTADO" = 1  
+    `);  
+  }  
 
+  async actualizarEstado(id: number, estado: number): Promise<any> {  
+    const result = await this.vinculacionEmpresasRepository.query(  
+      `UPDATE public."tbl_vinculacion_empresas"  
+      SET "VINE_ESTADO" = $1  
+      WHERE "VINE_ID" = $2  
+      RETURNING "VINE_ID"`,  
+      [estado, id],  
+    );  
 
-  async getTipoEmpresa(): Promise<any[]> {
-    return this.vinculacionEmpresaTipoRepository.query(`
-      SELECT "VINET_ID", "VINET_NOMBRE"
-      FROM public.tbl_vinculacion_empresa_tipo
-      WHERE "VINET_ESTADO" = 1
-    `);
-  }
+    if (!result || result.length === 0) {  
+      throw new HttpException('No se encontró la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
+    }  
 
-  async actualizarEstado(id: number, estado: number): Promise<any> {
-    const result = await this.vinculacionEmpresasRepository.query(
-      `UPDATE public."tbl_vinculacion_empresas"
-      SET "VINE_ESTADO" = $1
-      WHERE "VINE_ID" = $2`,
-      [estado, id],
-    );
-
-    // Verifica si se actualizó alguna fila
-    if (result[1] === 0) {
-      throw new HttpException('No se encontró la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);
-    }
-
-    return result;
-  }
-
-
-
-  async getEmpresaVinculadaById(VINE_ID: number): Promise<any> {  
-    const result = await this.vinculacionEmpresasRepository.query(`  
-        SELECT   
-        ve."VINE_ID",   
-        ve."VINE_NOMBRE",   
-        ve."VINE_TELEFONO",   
-        ve."VINE_CORREO",   
-        ve."VINE_CONTACTO",  
-        ve."VINE_IDENTIFICACION",  
-        ve."VINET_ID",  
-        vet."VINET_NOMBRE",  
-        ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
-        CASE  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
-            WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
-            ELSE 'OTRO'  
-        END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
-        ve."VINE_CODIGO_BANNER",  
-        ve."VINE_ID_PARROQUIA",  
-        ve."VINE_DIRECCION"  
-        FROM   
-        public."tbl_vinculacion_empresas" ve  
-        JOIN   
-        public."tbl_vinculacion_empresa_tipo" vet   
-        ON   
-        ve."VINET_ID" = vet."VINET_ID"  
-        WHERE   
-        ve."VINE_ID" = $1  
-    `, [VINE_ID]);  
-    return result[0];  
-  } 
-
+    return { message: 'Estado actualizado exitosamente', id: result[0].VINE_ID };  
+  }  
 
   async updateEmpresaVinculada(updateDto: UpdateVinculacionEmpresaDto): Promise<any> {  
     const updates = [];  
     const values = [];  
 
-    // Campos existentes  
     if (updateDto.VINE_NOMBRE !== undefined) {  
       updates.push(`"VINE_NOMBRE" = $${updates.length + 1}`);  
       values.push(updateDto.VINE_NOMBRE);  
@@ -177,7 +145,6 @@ export class VinculacionEmpresaService {
       updates.push(`"VINE_SECTOR_ECONOMICO" = $${updates.length + 1}`);  
       values.push(updateDto.VINE_SECTOR_ECONOMICO);  
     }  
- 
     if (updateDto.VINE_CODIGO_BANNER !== undefined) {  
       updates.push(`"VINE_CODIGO_BANNER" = $${updates.length + 1}`);  
       values.push(updateDto.VINE_CODIGO_BANNER);  
@@ -190,30 +157,74 @@ export class VinculacionEmpresaService {
       updates.push(`"VINE_DIRECCION" = $${updates.length + 1}`);  
       values.push(updateDto.VINE_DIRECCION);  
     }  
+    if (updateDto.VINE_DESCRIPCION !== undefined) {  
+      updates.push(`"VINE_DESCRIPCION" = $${updates.length + 1}`);  
+      values.push(updateDto.VINE_DESCRIPCION);  
+    }  
 
-    // Verificar si hay campos para actualizar  
     if (updates.length === 0) {  
       throw new HttpException('No fields to update', HttpStatus.BAD_REQUEST);  
     }  
 
-    // Agregar el ID al final de los valores  
     values.push(updateDto.VINE_ID);  
 
     const query = `  
       UPDATE public."tbl_vinculacion_empresas"  
       SET ${updates.join(', ')}  
       WHERE "VINE_ID" = $${values.length}  
+      RETURNING "VINE_ID"  
     `;  
 
     const result = await this.vinculacionEmpresasRepository.query(query, values);  
 
-    if (result[1] === 0) {  
+    if (!result || result.length === 0) {  
       throw new HttpException('No se encontró la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
     }  
 
-    return { message: 'Empresa actualizada exitosamente' };  
+    return { message: 'Empresa actualizada exitosamente', id: result[0].VINE_ID };  
   }  
 
 
+  // En vinculacion_empresa.service.ts  
 
-}
+    // En vinculacion_empresa.service.ts  
+
+
+
+
+  async getEmpresasVinculadas(): Promise<any[]> {  
+      return this.vinculacionEmpresasRepository.query(`  
+          SELECT   
+          ve."VINE_ID",   
+          ve."VINE_NOMBRE",   
+          ve."VINE_TELEFONO",   
+          ve."VINE_CORREO",   
+          ve."VINE_CONTACTO",  
+          ve."VINE_IDENTIFICACION",  
+          ve."VINET_ID",  
+          vet."VINET_NOMBRE",  
+          ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
+          CASE  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
+              WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
+              ELSE 'OTRO'  
+          END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
+          ve."VINE_CODIGO_BANNER",  
+          ve."VINE_ID_PARROQUIA",  
+          ve."VINE_DIRECCION",  
+          ve."VINE_DESCRIPCION"  
+          FROM   
+          public."tbl_vinculacion_empresas" ve  
+          JOIN   
+          public."tbl_vinculacion_empresa_tipo" vet   
+          ON   
+          ve."VINET_ID" = vet."VINET_ID"  
+          WHERE   
+          ve."VINE_ESTADO" = 1  
+          ORDER BY   
+          ve."VINE_NOMBRE" ASC  
+      `);  
+  }    
+
+}  

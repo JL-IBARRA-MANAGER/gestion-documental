@@ -51,4 +51,14 @@ export class CreateVinculacionEmpresaDto {
   @IsOptional()  
   @IsString()  
   VINE_DIRECCION?: string;  
+
+  @ApiPropertyOptional({   
+    example: 'Descripción detallada de la empresa',   
+    description: 'Descripción de la empresa',  
+    maxLength: 500   
+  })  
+  @IsOptional()  
+  @IsString()  
+  VINE_DESCRIPCION?: string;  
+
 }  
