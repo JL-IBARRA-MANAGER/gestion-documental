@@ -62,4 +62,20 @@ export class CreateVinculacionPracticaDto {
   @IsNotEmpty()  
   @IsString()  
   VCPB_CODIGO: string;  
+
+  @ApiProperty({   
+    example: 'Práctica de Desarrollo Web',   
+    description: 'Nombre de la práctica'   
+  })  
+  @IsNotEmpty()  
+  @IsString()  
+  VINP_NOMBRE_PRACTICA: string;  
+
+  @ApiProperty({   
+    example: '10',   
+    description: 'Número de cupos disponibles para la práctica'   
+  })  
+  @IsNotEmpty()  
+  VINP_CUPOS_PRACTICA: string; 
+
 }

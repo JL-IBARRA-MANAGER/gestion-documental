@@ -210,43 +210,39 @@ export class VinculacionController {
   }
 
 
-  @Post('registro-practica-por-carrera')
-  @ApiOperation({ summary: 'Registro de prácticas por carrera' })
-  @ApiHeader({ name: 'apikey', required: true })
-  @ApiHeader({ name: 'apisecret', required: true })
+  @Post('registro-practica-por-carrera')  
+  @ApiOperation({ summary: 'Registro de prácticas por carrera' })  
+  @ApiHeader({ name: 'apikey', required: true })  
+  @ApiHeader({ name: 'apisecret', required: true })  
   @ApiBody({  
     description: 'Registro de una práctica por carrera',  
     schema: {  
       type: 'object',  
       properties: {  
-        CAR_ID: { type: 'string', example: '4' },  
-        VINPT_ID: { type: 'string', example: '1' },  
-        VINESP_ID: { type: 'string', example: '1' },  
-        VINE_ID: { type: 'string', example: '1' },  
-        VINP_FECHA_INICIO: { type: 'string', format: 'date', example: '2024-01-01' },  
-        VINP_FECHA_FIN: { type: 'string', format: 'date', example: '2024-12-31' },  
-        VINP_HORAS_PRACTICAS: { type: 'string', example: '120' },  
-        VINP_CAMPO_AMP: { type: 'string', example: '3' },  
-        VINP_CAMPO_ESP: { type: 'string', example: '6' },  
-        VINP_CAMPO_DET: { type: 'string', example: '22' },  
-        DOC_CEDULA: { type: 'string', example: '0401355912' },  
-        SEDE_ID: { type: 'string', example: '3' },  
-        VINP_ESTADO: { type: 'string', example: '1' },  
-        PER_ID: { type: 'string', example: '119' },  
-        VCPB_CODIGO: { type: 'string', example: 'ABC123' } // New Column  
+        // ... propiedades existentes ...  
+        VCPB_CODIGO: { type: 'string', example: 'ABC123' },  
+        VINP_NOMBRE_PRACTICA: {   
+          type: 'string',   
+          example: 'Práctica de Desarrollo Web'   
+        },  
+        VINP_CUPOS_PRACTICA: {   
+          type: 'string',   
+          example: '10'   
+        }  
       },  
     },  
-  })
-  async registrarPractica(
-    @Headers('apikey') apiKey: string,
-    @Headers('apisecret') apiSecret: string,
-    @Body() createPracticaDto: CreateVinculacionPracticaDto,
-  ) {
-    if (apiKey !== process.env.API_KEY || apiSecret !== process.env.API_SECRET) {
-      throw new HttpException('Invalid API key or secret', HttpStatus.UNAUTHORIZED);
-    }
-    return this.vinculacionService.createPractica(createPracticaDto);
-  }
+  })  
+  async registrarPractica(  
+    @Headers('apikey') apiKey: string,  
+    @Headers('apisecret') apiSecret: string,  
+    @Body() createPracticaDto: CreateVinculacionPracticaDto,  
+  ) {  
+    if (apiKey !== process.env.API_KEY || apiSecret !== process.env.API_SECRET) {  
+      throw new HttpException('Invalid API key or secret', HttpStatus.UNAUTHORIZED);  
+    }  
+    return this.vinculacionService.createPractica(createPracticaDto);  
+  } 
+
 
   @Post('agregar-estudiante-practica')
   @ApiOperation({ summary: 'Agregar un estudiante a una práctica' })

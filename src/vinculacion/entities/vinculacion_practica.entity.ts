@@ -53,4 +53,11 @@ export class VinculacionPractica {
 
   @Column({ type: 'varchar', nullable: true, length: 500 })  
   VINP_RESULTADOS: string;  
+
+  @Column({ type: 'varchar', length: 500 })  
+  VINP_NOMBRE_PRACTICA: string;  
+
+  @Column({ type: 'integer' })  
+  VINP_CUPOS_PRACTICA: number; 
+
 }

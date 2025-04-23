@@ -274,6 +274,7 @@ export class VinculacionService {
     const detalles = await this.vinculacionPracticaRepository.query(`
       SELECT 
         vp."VINP_ID",
+        vp."VINP_NOMBRE_PRACTICA" AS "Nombre de la práctica",
         vpt."VINPT_NOMBRE" AS "Tipo de práctica",
         ve."VINESP_NOMBRE" AS "Especificación de práctica",
         vemp."VINE_NOMBRE" AS "Entidad receptora",
@@ -335,6 +336,7 @@ export class VinculacionService {
     return this.vinculacionPracticaRepository.query(`
         SELECT 
             vp."VINP_ID",
+            vp."VINP_NOMBRE_PRACTICA" AS "Nombre de la práctica",
             vpt."VINPT_NOMBRE" AS "Tipo de práctica",
             ve."VINESP_NOMBRE" AS "Especificación de práctica",
             ve2."VINE_NOMBRE" AS "Empresa",
@@ -380,6 +382,7 @@ export class VinculacionService {
     return this.vinculacionPracticaRepository.query(`
         SELECT 
             vp."VINP_ID",
+            vp."VINP_NOMBRE_PRACTICA" AS "Nombre de la práctica",
             vpt."VINPT_NOMBRE" AS "Tipo de práctica",
             ve."VINESP_NOMBRE" AS "Especificación de práctica",
             ve2."VINE_NOMBRE" AS "Empresa",
@@ -425,6 +428,7 @@ export class VinculacionService {
     return this.vinculacionPracticaRepository.query(`
         SELECT 
             vp."VINP_ID",
+            vp."VINP_NOMBRE_PRACTICA" AS "Nombre de la práctica",
             vpt."VINPT_NOMBRE" AS "Tipo de práctica",
             ve."VINESP_NOMBRE" AS "Especificación de práctica",
             ve2."VINE_NOMBRE" AS "Empresa",
@@ -469,8 +473,11 @@ export class VinculacionService {
   async createPractica(createPracticaDto: CreateVinculacionPracticaDto): Promise<void> {  
     await this.vinculacionPracticaRepository.query(`  
       INSERT INTO public.tbl_vinculacion_practica   
-      ("VINPT_ID", "VINESP_ID", "VINE_ID", "VINP_FECHA_INICIO", "VINP_FECHA_FIN", "VINP_HORAS_PRACTICAS", "VINP_CAMPO_ESP", "VINP_CAMPO_DET", "DOC_CEDULA", "SEDE_ID", "VINP_ESTADO", "VINP_CAMPO_AMP", "PER_ID", "CAR_ID", "VCPB_CODIGO")  
-      VALUES (\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15)  
+      ("VINPT_ID", "VINESP_ID", "VINE_ID", "VINP_FECHA_INICIO", "VINP_FECHA_FIN",   
+      "VINP_HORAS_PRACTICAS", "VINP_CAMPO_ESP", "VINP_CAMPO_DET", "DOC_CEDULA",   
+      "SEDE_ID", "VINP_ESTADO", "VINP_CAMPO_AMP", "PER_ID", "CAR_ID", "VCPB_CODIGO",  
+      "VINP_NOMBRE_PRACTICA", "VINP_CUPOS_PRACTICA")  
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)  
     `, [  
       Number(createPracticaDto.VINPT_ID),  
       Number(createPracticaDto.VINESP_ID),  
@@ -486,9 +493,12 @@ export class VinculacionService {
       Number(createPracticaDto.VINP_CAMPO_AMP),  
       Number(createPracticaDto.PER_ID),  
       Number(createPracticaDto.CAR_ID),  
-      createPracticaDto.VCPB_CODIGO // New Column  
+      createPracticaDto.VCPB_CODIGO,  
+      createPracticaDto.VINP_NOMBRE_PRACTICA,  
+      Number(createPracticaDto.VINP_CUPOS_PRACTICA)  
     ]);  
-  }
+  }  
+
 
   // POST: Agregar a un estudiante a una práctica
   async agregarEstudianteAPractica(dto: CreateVinculacionPracticaEstudianteDto): Promise<void> {
