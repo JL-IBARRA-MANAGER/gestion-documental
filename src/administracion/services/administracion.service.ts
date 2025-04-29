@@ -153,7 +153,9 @@ export class AdministracionService {
     const resultados = await this.usuarioCarreraRepository.query(`
       SELECT 
         a."USUCP_ID", 
-        a."USU_ID", 
+        a."USU_ID",
+        v."VCPB_CODIGO", 
+        v."VCPB_CODIGO" AS "CÓDIGO BANNER",    
         a."CAR_ID", 
         c."CAR_NOMBRE",
         c."CAR_CARRERA", 
@@ -163,11 +165,13 @@ export class AdministracionService {
         c."CAR_ACTIVA_ESCUELA",
         a."USUCP_TITULACION", 
         a."USUCP_EDITAR",
-	a."USUCP_ESTADO"
+	a."USUCP_ESTADO" 
       FROM 
         public."tbl_usuario_carrera_privilegios" a
       JOIN 
           public."tbl_carrera" c ON c."CAR_ID" = a."CAR_ID"
+      LEFT JOIN   
+          public."tbl_vinculacion_codigo_programa_banner" v ON v."CAR_ID" = a."CAR_ID"  
       WHERE a."USU_ID" = $1 
       ORDER BY c."CAR_PADREESC" DESC, c."CAR_NOMBRE" ASC
     `, [idUsuario]);
@@ -182,6 +186,7 @@ export class AdministracionService {
         return {
           "USUCP_ID": user["USUCP_ID"],
           "USU_ID": user["USU_ID"],
+          "CÓDIGO BANNER": user["VCPB_CODIGO"],
           "CAR_ID": user["CAR_ID"],
           "ESCUELA": padre ? padre["CAR_NOMBRE"] : null,
           "CARRERA": user["CAR_NOMBRE"], 
@@ -202,7 +207,8 @@ export class AdministracionService {
     const resultados = await this.usuarioCarreraRepository.query(`
       SELECT 
         a."USUCP_ID", 
-        a."USU_ID", 
+        a."USU_ID",  
+        v."VCPB_CODIGO",  
         a."CAR_ID", 
         c."CAR_NOMBRE",
         c."CAR_CARRERA", 
@@ -219,6 +225,8 @@ export class AdministracionService {
         public."tbl_carrera" c ON c."CAR_ID" = a."CAR_ID"
       JOIN 
         public."tbl_usuarios" d ON d."USU_ID" = a."USU_ID"
+      LEFT JOIN   
+        public."tbl_vinculacion_codigo_programa_banner" v ON v."CAR_ID" = a."CAR_ID"  
       WHERE 
         d."USU_USUARIO" = $1::text  -- Cast para asegurar que es de tipo texto
       ORDER BY 
@@ -236,6 +244,7 @@ export class AdministracionService {
         return {
           "USUCP_ID": user["USUCP_ID"],
           "USU_ID": user["USU_ID"],
+          "CÓDIGO BANNER": user["VCPB_CODIGO"],
           "CAR_ID": user["CAR_ID"],
           "ESCUELA": padre ? padre["CAR_NOMBRE"] : null,
           "CARRERA": user["CAR_NOMBRE"], 

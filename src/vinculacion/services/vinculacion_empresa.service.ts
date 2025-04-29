@@ -107,7 +107,7 @@ export class VinculacionEmpresaService {
     );  
 
     if (!result || result.length === 0) {  
-      throw new HttpException('No se encontr� la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
+      throw new HttpException('No se encontró la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
     }  
 
     return { message: 'Estado actualizado exitosamente', id: result[0].VINE_ID };  
@@ -178,7 +178,7 @@ export class VinculacionEmpresaService {
     const result = await this.vinculacionEmpresasRepository.query(query, values);  
 
     if (!result || result.length === 0) {  
-      throw new HttpException('No se encontr� la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
+      throw new HttpException('No se encontró la empresa o no se realizaron cambios', HttpStatus.BAD_REQUEST);  
     }  
 
     return { message: 'Empresa actualizada exitosamente', id: result[0].VINE_ID };  
@@ -194,37 +194,46 @@ export class VinculacionEmpresaService {
 
   async getEmpresasVinculadas(): Promise<any[]> {  
       return this.vinculacionEmpresasRepository.query(`  
-          SELECT   
-          ve."VINE_ID",   
-          ve."VINE_NOMBRE",   
-          ve."VINE_TELEFONO",   
-          ve."VINE_CORREO",   
-          ve."VINE_CONTACTO",  
-          ve."VINE_IDENTIFICACION",  
-          ve."VINET_ID",  
-          vet."VINET_NOMBRE",  
-          ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
-          CASE  
-              WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
-              WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
-              WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
-              ELSE 'OTRO'  
-          END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
-          ve."VINE_CODIGO_BANNER",  
-          ve."VINE_ID_PARROQUIA",  
-          ve."VINE_DIRECCION",  
-          ve."VINE_DESCRIPCION"  
-          FROM   
-          public."tbl_vinculacion_empresas" ve  
-          JOIN   
-          public."tbl_vinculacion_empresa_tipo" vet   
-          ON   
-          ve."VINET_ID" = vet."VINET_ID"  
-          WHERE   
-          ve."VINE_ESTADO" = 1  
-          ORDER BY   
-          ve."VINE_NOMBRE" ASC  
-      `);  
+                SELECT   
+                ve."VINE_ID",   
+                ve."VINE_NOMBRE",   
+                ve."VINE_TELEFONO",   
+                ve."VINE_CORREO",   
+                ve."VINE_CONTACTO",  
+                ve."VINE_IDENTIFICACION",  
+                ve."VINET_ID",  
+                vet."VINET_NOMBRE",  
+                ve."VINE_SECTOR_ECONOMICO" as "VINE_SECTOR_ECONOMICO_ID",   
+                CASE  
+                    WHEN ve."VINE_SECTOR_ECONOMICO" = 1 THEN 'PRIMARIO'  
+                    WHEN ve."VINE_SECTOR_ECONOMICO" = 2 THEN 'SECUNDARIO'  
+                    WHEN ve."VINE_SECTOR_ECONOMICO" = 3 THEN 'TERCIARIO'  
+                    ELSE 'OTRO'  
+                END as "VINE_SECTOR_ECONOMICO_TEXTUAL",  
+                ve."VINE_CODIGO_BANNER",  
+                -- Agregamos la información de ubicación geográfica  
+                p.id as "ID_PARROQUIA",  
+                p.parroquia as "PARROQUIA",  
+                c.id as "ID_CANTON",  
+                c.canton as "CANTÓN",  
+                pr.id as "ID_PROVINCIA",  
+                pr.provincia as "PROVINCIA",  
+                ve."VINE_ID_PARROQUIA",  
+                ve."VINE_DIRECCION",  
+                ve."VINE_DESCRIPCION"  
+                FROM   
+                public."tbl_vinculacion_empresas" ve  
+                JOIN public."tbl_vinculacion_empresa_tipo" vet ON ve."VINET_ID" = vet."VINET_ID"  
+                -- JOIN para parroquia  
+                LEFT JOIN public.tbl_global_parroquia p ON ve."VINE_ID_PARROQUIA" = p.id  
+                -- JOIN para cantón  
+                LEFT JOIN public.tbl_global_canton c ON p.id_canton = c.id  
+                -- JOIN para provincia  
+                LEFT JOIN public.tbl_global_provincia pr ON c.id_provincia = pr.id  
+                WHERE   
+                ve."VINE_ESTADO" = 1  
+                ORDER BY   
+                ve."VINE_NOMBRE" ASC;        `);  
   }    
 
 }  

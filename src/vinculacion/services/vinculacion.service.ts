@@ -72,6 +72,8 @@ export class VinculacionService {
                 WHEN f."VINE_SECTOR_ECONOMICO" = 3 THEN 'Terciario'  
                 ELSE 'Desconocido'  
             END AS "SECTOR ECONÓMICO DE LA INSTITUCIÓN",  
+            c."VINP_NOMBRE_PRACTICA" AS "NOMBRE DE LA PRÁCTICA",
+            c."VINP_CUPOS_PRACTICA" AS "CUPOS",  
             c."VINP_FECHA_INICIO" AS "FECHA DE INICIO",   
             c."VINP_FECHA_FIN" AS "FECHA DE FINALIZACIÓN",  
             c."VINP_HORAS_PRACTICAS" AS "HORAS DE PRÁCTICAS LABORALES DEL PARTICIPANTE",   
@@ -834,7 +836,9 @@ export class VinculacionService {
     try {  
         const practicas = await this.vinculacionPracticaRepository.query(  
         `SELECT   
-            vp."VINP_ID",   
+            vp."VINP_ID", 
+            vp."VINP_NOMBRE_PRACTICA" AS "NOMBRE DE LA PRÁCTICA",
+            vp."VINP_CUPOS_PRACTICA" AS "CUPOS",  
             vp."VINP_FECHA_INICIO" AS "FECHA INICIO",   
             vp."VINP_FECHA_FIN" AS "FECHA FIN",   
             vp."VINP_HORAS_PRACTICAS" AS "HORAS PRÁCTICAS",  

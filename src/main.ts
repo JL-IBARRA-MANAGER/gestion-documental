@@ -16,7 +16,8 @@ async function bootstrap() {
 
   // Habilitación de CORS  
   app.enableCors({  
-    origin: ['https://pucei.edu.ec:10001', 'https://pucei.edu.ec:10005'],   
+    //origin: ['https://pucei.edu.ec:10001', 'https://pucei.edu.ec:10005'],  
+    origin: '*', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',  
     allowedHeaders: ['Content-Type', 'Authorization', 'apikey', 'apisecret'],  
     credentials: true,  
