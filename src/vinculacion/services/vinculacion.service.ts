@@ -735,7 +735,7 @@ export class VinculacionService {
     const newFileName = this.generateFileName(file.originalname);  
 
     // Construir URL para subida remota (incluyendo "index.php" y cualquier subruta necesaria)  
-    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practica-seguimientos`; // Verifica si necesitas incluir "documental_dev"  
+    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practica_seguimientos`; // Verifica si necesitas incluir "documental_dev"  
 
     console.log('Uploading file to remote URL:', remoteUploadUrl);  
     console.log('Generated file name:', newFileName);  
@@ -780,7 +780,7 @@ export class VinculacionService {
     }  
 
     const newFileName = this.generateFileName(file.originalname);  
-    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practicas-plan`;  
+    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practicas_plan`;  
 
     await this.uploadFileToRemoteServer(file, remoteUploadUrl, newFileName);  
 
@@ -812,7 +812,7 @@ export class VinculacionService {
     }  
 
     const newFileName = this.generateFileName(file.originalname);  
-    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practicas-resultados`;  
+    const remoteUploadUrl = `${this.remoteServerUrl}/index.php/practicas_resultados`;  
 
     await this.uploadFileToRemoteServer(file, remoteUploadUrl, newFileName);  
 
